@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financeiro PRO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💸 Meu Dashboard Financeiro</h1>
+            <p>Visão Geral de {{ dados.mes }}</p>
+        </header>
+
+        <div class="cards-grid">
+            <div class="card">
+                <h3>Total Gasto</h3>
+                <p class="valor">{{ dados.total_gasto }}</p>
+            </div>
+            <div class="card">
+                <h3>Maior Despesa</h3>
+                <p class="valor destaque">{{ dados.maior_despesa }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+/* Importando uma fonte profissional do Google */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #0E1117;
+    color: #FAFAFA;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 20px;
+}
+
+header h1 {
+    color: #00C853;
+}
+
+/* Estilo profissional dos Cards */
+.cards-grid {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background-color: #1E2129;
+    padding: 25px;
+    border-radius: 12px;
+    flex: 1;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 200, 83, 0.2);
+}
+
+.card h3 {
+    font-size: 14px;
+    color: #A0AEC0;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.card .valor {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.card .destaque {
+    color: #FF4B4B;
+}
