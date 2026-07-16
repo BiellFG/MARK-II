@@ -1,66 +1,46 @@
-/* Importando uma fonte profissional do Google */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
-
-body {
-    background-color: #0E1117;
-    color: #FAFAFA;
-}
-
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px 20px;
-}
-
-header {
-    margin-bottom: 40px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 20px;
-}
-
-header h1 {
-    color: #00C853;
-}
-
-/* Estilo profissional dos Cards */
-.cards-grid {
-    display: flex;
-    gap: 20px;
-}
-
-.card {
+/* --- Estilos da Nova Tabela --- */
+.tabela-container {
+    margin-top: 40px;
     background-color: #1E2129;
     padding: 25px;
     border-radius: 12px;
-    flex: 1;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 1.2s ease-in-out;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 200, 83, 0.2);
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
-.card h3 {
-    font-size: 14px;
+.tabela-container h2 {
+    margin-bottom: 20px;
+    font-size: 18px;
     color: #A0AEC0;
-    margin-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+}
+
+th {
+    color: #00C853;
     text-transform: uppercase;
+    font-size: 14px;
 }
 
-.card .valor {
-    font-size: 28px;
-    font-weight: 700;
+tr:hover td {
+    background-color: #262730; /* Efeito de brilho ao passar o mouse na linha */
 }
 
-.card .destaque {
-    color: #FF4B4B;
+.col-valor {
+    text-align: right;
+    font-weight: 600;
 }

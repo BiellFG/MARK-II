@@ -23,6 +23,26 @@
                 <p class="valor destaque">{{ dados.maior_despesa }}</p>
             </div>
         </div>
+
+        <div class="tabela-container">
+            <h2>Detalhamento de Despesas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoria / Despesa</th>
+                        <th class="col-valor">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for despesa in despesas %}
+                    <tr>
+                        <td>{{ despesa.nome }}</td>
+                        <td class="col-valor">{{ despesa.valor }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
