@@ -3,46 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financeiro PRO</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Dashboard Financeiro {{ ano }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root{--bg-base:#060b14;--bg-sidebar:#0a0f1e;--bg-card:rgba(17,24,39,0.7);--bg-input:rgba(30,41,59,0.6);--border:rgba(255,255,255,0.06);--border-light:rgba(255,255,255,0.1);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--accent:#6366f1;--accent-glow:rgba(99,102,241,0.3);--green:#22c55e;--green-glow:rgba(34,197,94,0.3);--red:#ef4444;--red-glow:rgba(239,68,68,0.3);--radius:12px;--radius-sm:8px;--sidebar-w:220px}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-base);color:var(--text-primary);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+        body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,0.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(34,197,94,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+        .sidebar{width:var(--sidebar-w);background:var(--bg-sidebar);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto;backdrop-filter:blur(12px)}
+        .sidebar-brand{display:flex;align-items:center;gap:10px;padding:22px 18px;border-bottom:1px solid var(--border)}
+        .brand-logo{width:28px;height:28px;color:var(--accent)}
+        .brand-title{font-size:15px;font-weight:700;letter-spacing:-.3px}
+        .brand-sub{font-size:10px;color:var(--text-muted)}
+        .sidebar-section{padding:18px}
+        .sidebar-label{font-size:9px;font-weight:700;color:var(--text-muted);letter-spacing:1.5px;margin-bottom:10px}
+        .year-selector{display:flex;gap:4px}
+        .year-btn{padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;background:var(--bg-input);color:var(--text-secondary);cursor:pointer;transition:all .2s;border:1px solid transparent}
+        .year-btn.active{background:var(--accent);color:#fff;box-shadow:0 0 12px var(--accent-glow)}
+        .year-btn:hover:not(.active){background:var(--border-light);color:var(--text-primary)}
+        .month-nav{display:flex;flex-direction:column;gap:1px}
+        .month-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:var(--radius-sm);color:var(--text-secondary);text-decoration:none;font-size:12px;font-weight:500;transition:all .15s}
+        .month-item:hover{background:var(--bg-input);color:var(--text-primary)}
+        .month-item.active{background:rgba(99,102,241,.15);color:#818cf8}
+        .month-dot{width:5px;height:5px;border-radius:50%;background:var(--text-muted);flex-shrink:0;transition:all .2s}
+        .month-item.active .month-dot{background:#818cf8;box-shadow:0 0 8px var(--accent-glow)}
+        .main{margin-left:var(--sidebar-w);flex:1;padding:24px 28px;display:flex;flex-direction:column;gap:20px;min-width:0;position:relative;z-index:1}
+        .top-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+        .page-title{font-size:24px;font-weight:700;letter-spacing:-.5px;background:linear-gradient(135deg,var(--text-primary),var(--text-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .page-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+        .header-actions{display:flex;align-items:center;gap:10px}
+        .btn-export{padding:8px 16px;border-radius:var(--radius-sm);background:var(--bg-input);border:1px solid var(--border);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .25s;backdrop-filter:blur(8px)}
+        .btn-export:hover{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 16px var(--accent-glow)}
+        .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;box-shadow:0 0 12px var(--accent-glow)}
+        .kpi-row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+        .kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:all .3s;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+        .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);pointer-events:none}
+        .kpi-card:hover{border-color:var(--border-light);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 1px rgba(255,255,255,0.1)}
+        .kpi-sm{min-height:148px;display:flex;flex-direction:column}
+        .kpi-accent{border-color:rgba(99,102,241,0.2)}
+        .kpi-accent:hover{border-color:rgba(99,102,241,0.4);box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 20px rgba(99,102,241,0.1)}
+        .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+        .kpi-dot{width:8px;height:8px;border-radius:50%}
+        .kpi-dot.green{background:var(--green);box-shadow:0 0 10px var(--green-glow)}
+        .kpi-dot.red{background:var(--red);box-shadow:0 0 10px var(--red-glow)}
+        .kpi-dot.blue{background:var(--accent);box-shadow:0 0 10px var(--accent-glow)}
+        .kpi-dot.purple{background:#a855f7;box-shadow:0 0 10px rgba(168,85,247,.4)}
+        .kpi-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:14px}
+        .kpi-badge.up{background:rgba(34,197,94,.12);color:var(--green)}
+        .kpi-badge.down{background:rgba(239,68,68,.12);color:var(--red)}
+        .kpi-badge:not(.up):not(.down){background:var(--bg-input);color:var(--text-secondary)}
+        .kpi-label{font-size:11px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.2px}
+        .kpi-value{font-size:24px;font-weight:700;letter-spacing:-0.3px}
+        .kpi-value-sm{font-size:30px;font-weight:800;background:linear-gradient(135deg,var(--accent),#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .kpi-sub-text{font-size:10px;color:var(--text-muted);margin-top:2px}
+        .kpi-compare{font-size:10px;color:var(--text-muted);margin-top:4px}
+        .kpi-spark{margin-top:auto;height:36px}
+        .spark-svg{width:100%;height:36px;overflow:visible}
+        .chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+        .chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s;backdrop-filter:blur(12px);position:relative}
+        .chart-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);pointer-events:none}
+        .chart-card:hover{border-color:var(--border-light);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+        .chart-card.span-2{grid-column:span 2}
+        .chart-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+        .chart-header h3{font-size:13px;font-weight:600;letter-spacing:-0.2px}
+        .chart-sub{font-size:10px;color:var(--text-muted);font-weight:500}
+        .chart-body{padding:14px;height:260px;position:relative}
+        .chart-body canvas{width:100%!important;height:100%!important}
+        .gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:18px}
+        .gauge-item{display:flex;flex-direction:column;align-items:center;gap:8px}
+        .gauge-ring{width:78px;height:78px;position:relative}
+        .gauge-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+        .gauge-bg{fill:none;stroke:var(--bg-input);stroke-width:3}
+        .gauge-fill{fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dasharray 1s ease;filter:drop-shadow(0 0 3px currentColor)}
+        .gauge-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:700}
+        .gauge-label{font-size:10px;color:var(--text-secondary);font-weight:500;text-align:center}
+        .bar-list{padding:14px 18px;display:flex;flex-direction:column;gap:11px;max-height:260px;overflow-y:auto}
+        .bar-item{display:flex;align-items:center;gap:8px}
+        .bar-name{width:95px;font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+        .bar-track{flex:1;height:8px;background:var(--bg-input);border-radius:10px;overflow:hidden}
+        .bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#818cf8);border-radius:10px;transition:width .8s ease;box-shadow:0 0 8px rgba(99,102,241,0.3)}
+        .bar-val{font-size:11px;font-weight:600;width:85px;text-align:right;flex-shrink:0}
+        @media(max-width:1200px){.chart-row{grid-template-columns:1fr 1fr}.chart-card.span-2{grid-column:span 2}}
+        @media(max-width:900px){.sidebar{display:none}.main{margin-left:0;padding:14px}.chart-row{grid-template-columns:1fr}.chart-card.span-2{grid-column:span 1}.kpi-row-4{grid-template-columns:repeat(2,1fr)}.gauge-grid{grid-template-columns:repeat(3,1fr)}}
+        @media(max-width:500px){.kpi-row-4{grid-template-columns:1fr}.gauge-grid{grid-template-columns:repeat(2,1fr)}.main{padding:10px;gap:12px}}
+        ::-webkit-scrollbar{width:3px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:2px}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .kpi-card,.chart-card{animation:fadeUp .4s ease both}
+        .kpi-card:nth-child(2){animation-delay:.05s}
+        .kpi-card:nth-child(3){animation-delay:.1s}
+        .kpi-card:nth-child(4){animation-delay:.15s}
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>💸 Meu Dashboard Financeiro</h1>
-            <p>Visão Geral de {{ dados.mes }}</p>
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="6" y1="16" x2="18" y2="16"/></svg>
+            <div><div class="brand-title">Finanças</div><div class="brand-sub">Dashboard Pessoal</div></div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">ANO</div>
+            <div class="year-selector">
+                <span class="year-btn">2024</span><span class="year-btn">2025</span><span class="year-btn active">{{ ano }}</span>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">MESES</div>
+            <nav class="month-nav">
+                {% for opcao in opcoes_meses %}
+                <a href="?mes={{ opcao.abrev }}" class="month-item {% if opcao.selecionado %}active{% endif %}"><span class="month-dot"></span> {{ opcao.nome }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="top-header">
+            <div><h1 class="page-title">Dashboard Financeiro</h1><p class="page-sub">Visão geral das suas finanças em {{ ano }}</p></div>
+            <div class="header-actions"><button class="btn-export">📥 Exportar</button><div class="avatar">GF</div></div>
         </header>
 
-        <div class="cards-grid">
-            <div class="card">
-                <h3>Total Gasto</h3>
-                <p class="valor">{{ dados.total_gasto }}</p>
+        <!-- 4 KPI Cards -->
+        <div class="kpi-row-4">
+            <div class="kpi-card kpi-sm">
+                <div class="kpi-top"><span class="kpi-dot green"></span><span class="kpi-badge {% if variacao >= 0 %}up{% else %}down{% endif %}">{% if variacao >= 0 %}↑{% else %}↓{% endif %} {{ '%+.1f'|format(variacao) }}%</span></div>
+                <div class="kpi-label">Gasto do mês</div>
+                <div class="kpi-value">{{ total_mes }}</div>
+                <div class="kpi-compare">mês ant.: {{ total_mes_ant }}</div>
+                <div class="kpi-spark">
+                    <svg width="100%" height="36" viewBox="0 0 {{ tamanho_mensais * 14 }} 36" class="spark-svg">
+                        <path d="M0,36 {% for v in totais_mensais_raw %}L{{ loop.index0 * 14 }},{{ (36 - (v / max_mensal * 32))|round(1) if max_mensal > 0 else 18 }} {% endfor %}" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
             </div>
-            <div class="card">
-                <h3>Maior Despesa</h3>
-                <p class="valor destaque">{{ dados.maior_despesa }}</p>
+            <div class="kpi-card kpi-sm">
+                <div class="kpi-top"><span class="kpi-dot red"></span><span class="kpi-badge down">{{ mes_ant_nome }}</span></div>
+                <div class="kpi-label">Despesas do mês</div>
+                <div class="kpi-value">{{ total_mes }}</div>
+                <div class="kpi-compare">{{ mes_ant_nome }}: {{ total_mes_ant }}</div>
+                <div class="kpi-spark">
+                    <svg width="100%" height="36" viewBox="0 0 {{ tamanho_mensais * 14 }} 36" class="spark-svg">
+                        <path d="M0,36 {% for v in totais_mensais_raw %}L{{ loop.index0 * 14 }},{{ (36 - (v / max_mensal * 32))|round(1) if max_mensal > 0 else 18 }} {% endfor %}" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="kpi-card kpi-sm kpi-accent">
+                <div class="kpi-top"><span class="kpi-dot blue"></span><span class="kpi-badge">{{ mes_nome }}</span></div>
+                <div class="kpi-label">Despesas no Mês</div>
+                <div class="kpi-value-sm">{{ donut_mes_pct }}%</div>
+                <div class="kpi-sub-text">do total anual</div>
+            </div>
+            <div class="kpi-card kpi-sm kpi-accent">
+                <div class="kpi-top"><span class="kpi-dot purple"></span><span class="kpi-badge">{{ ano }}</span></div>
+                <div class="kpi-label">Despesas no Ano</div>
+                <div class="kpi-value">{{ total_ano_fmt }}</div>
+                <div class="kpi-sub-text">acumulado</div>
             </div>
         </div>
 
-        <div class="tabela-container">
-            <h2>Detalhamento de Despesas</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Categoria / Despesa</th>
-                        <th class="col-valor">Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for despesa in despesas %}
-                    <tr>
-                        <td>{{ despesa.nome }}</td>
-                        <td class="col-valor">{{ despesa.valor }}</td>
-                    </tr>
+        <!-- Row 1: Análise Mensal (2/3) + Detalhamento (1/3) -->
+        <div class="chart-row">
+            <div class="chart-card span-2">
+                <div class="chart-header"><h3>📊 Análise Mensal</h3><span class="chart-sub">{{ ano }}</span></div>
+                <div class="chart-body"><canvas id="chartMensal"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><h3>📋 Detalhamento de Despesas</h3><span class="chart-sub">{{ mes_nome }}</span></div>
+                <div class="bar-list">
+                    {% for d in detalhamento %}
+                    <div class="bar-item"><span class="bar-name">{{ d.nome }}</span><div class="bar-track"><div class="bar-fill" style="width:{{ (d.valor / total_mes_raw * 100) if total_mes_raw > 0 else 0 }}%"></div></div><span class="bar-val">{{ d.valor_fmt }}</span></div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- Row 2: Participação (2/3) + Receitas/Despesas (1/3) -->
+        <div class="chart-row">
+            <div class="chart-card span-2">
+                <div class="chart-header"><h3>📈 Participação na base anual</h3></div>
+                <div class="gauge-grid">
+                    {% for g in gauges %}
+                    <div class="gauge-item">
+                        <div class="gauge-ring">
+                            <svg viewBox="0 0 36 36">
+                                <path class="gauge-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="gauge-fill" stroke="url(#grad{{ loop.index }})" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" stroke-dasharray="{{ g.percentual }}, 100"/>
+                            </svg>
+                            <span class="gauge-text">{{ g.percentual }}%</span>
+                        </div>
+                        <span class="gauge-label">{{ g.nome }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header"><h3>📉 Receitas e Despesas</h3><span class="chart-sub">{{ ano }}</span></div>
+                <div class="chart-body"><canvas id="chartEvolucao"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            {% for g in gauges %}
+            <linearGradient id="grad{{ loop.index }}" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="{{ cores_list[loop.index0 % cores_list|length] }}"/>
+                <stop offset="100%" stop-color="{{ cores_list[(loop.index0 + 1) % cores_list|length] }}"/>
+            </linearGradient>
+            {% endfor %}
+        </defs>
+    </svg>
+
+    <script>
+    const CORES = {{ cores|safe }};
+    const fmtReal = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2});
+
+    new Chart(document.getElementById('chartMensal'),{type:'bar',data:{labels:{{ labels_mensais|safe }},datasets:{{ datasets_barras|safe }}},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',padding:14,font:{size:10},usePointStyle:true,pointStyleWidth:7}},tooltip:{callbacks:{label:ctx=>fmtReal(ctx.raw)}}},scales:{x:{stacked:true,grid:{color:'#1e293b'},ticks:{color:'#64748b',font:{size:10}}},y:{stacked:true,grid:{color:'#1e293b'},ticks:{color:'#64748b',callback:v=>'R$ '+(v/1000).toFixed(0)+'k'}}}}});
+
+    new Chart(document.getElementById('chartEvolucao'),{type:'line',data:{labels:{{ evolucao_labels|safe }},datasets:[{label:'Despesas',data:{{ evolucao_valores|safe }},borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.08)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#ef4444',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},usePointStyle:true}},tooltip:{callbacks:{label:ctx=>fmtReal(ctx.raw)}}},scales:{x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'#1e293b'},ticks:{color:'#64748b',callback:v=>'R$ '+(v/1000).toFixed(0)+'k'}}}}});
+    </script>
 </body>
 </html>
